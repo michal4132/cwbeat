@@ -1,0 +1,31 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	test_gpio: gpio@1000 {
+		compatible = "zgmicro,ws9652a-gpio";
+		reg = <0x1000 0x40>, <0x2000 0x80>;
+		reg-names = "port", "pin_output";
+		gpio-controller;
+		#gpio-cells = <2>;
+		bank = <0>;
+		ngpios = <24>;
+		gpio-reserved-ranges = <7 2>, <14 1>;
+	};
+
+	test-controls {
+		compatible = "gpio-leds";
+		power_hold_pin: power-hold {
+			gpios = <&test_gpio 0 GPIO_ACTIVE_HIGH>;
+		};
+		reconfig_pin: reconfig {
+			gpios = <&test_gpio 1 GPIO_ACTIVE_HIGH>;
+		};
+		active_low_pin: active-low {
+			gpios = <&test_gpio 16 GPIO_ACTIVE_LOW>;
+		};
+		pull_down_pin: pull-down {
+			gpios = <&test_gpio 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+		};
+	};
+};

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config CLOCK_CONTROL_WS9652A
+	bool "WS9652A inherited clock controller"
+	depends on CLOCK_CONTROL
+	depends on DT_HAS_ZGMICRO_WS9652A_CLOCK_ENABLED
+	help
+	  Read the inherited core and bus clock rates with bounded sampling while
+	  retained peers may change the clock tree. This driver does not modify
+	  PLLs, dividers or clock gates.

@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+
+add_subdirectory_ifdef(CONFIG_PINCTRL pinctrl)
+add_subdirectory_ifdef(CONFIG_GPIO gpio)
+add_subdirectory_ifdef(CONFIG_BOARD_ID_GPIO board_id)
+add_subdirectory_ifdef(CONFIG_UDC_DRIVER usb)
+add_subdirectory(mfd)
+add_subdirectory(peer)
+add_subdirectory(mbox)
+add_subdirectory(misc)
+add_subdirectory_ifdef(CONFIG_ADC adc)
+add_subdirectory_ifdef(CONFIG_CLOCK_CONTROL_WS9652A clock_control)
+add_subdirectory_ifdef(CONFIG_I2C i2c)
+add_subdirectory_ifdef(CONFIG_CHARGER charger)
+add_subdirectory_ifdef(CONFIG_WATCHDOG watchdog)

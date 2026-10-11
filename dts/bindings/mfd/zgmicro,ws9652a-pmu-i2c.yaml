@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+description: WS9652A PMU accessed through its internal I2C connection at 0x34
+compatible: "zgmicro,ws9652a-pmu"
+include: [ws9652a-pmu-common.yaml, i2c-device.yaml]
+properties:
+  direct-bridge:
+    type: phandle
+    description: |
+      Optional direct bridge to the same PMU. Used during preparation to leave
+      an inherited direct mode before using I2C; it is not a second PMU device.

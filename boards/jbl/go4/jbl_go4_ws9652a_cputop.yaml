@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+identifier: jbl_go4/ws9652a/cputop
+name: JBL Go 4 TOP
+vendor: jbl
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+# One contiguous private TOP SRAM bank.
+ram: 64
+flash: 256
+supported:
+  - gpio
+  - uart
+  - usb_device
+  - input

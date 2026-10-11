@@ -1,0 +1,12 @@
+config CWBEAT_STOCK_PEER
+ bool "Retained Go 4 BT/DSP peer adapter"
+ depends on ZBUS && MBOX && GPIO && BOARD_JBL_GO4 && SOC_WS9652A_CPUTOP
+ depends on CWBEAT_AUDIO
+ select WS9652A_PEER
+ default y
+
+if CWBEAT_STOCK_PEER
+module = CWBEAT_STOCK_PEER
+module-str = CWbeat stock peer
+source "subsys/logging/Kconfig.template.log_config"
+endif

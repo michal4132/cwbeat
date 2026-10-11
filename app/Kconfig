@@ -1,0 +1,5 @@
+# Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+# SPDX-License-Identifier: Apache-2.0
+
+rsource "src/Kconfig"
+source "Kconfig.zephyr"

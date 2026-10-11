@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+description: WS9652A TX-only channel-zero signal doorbell
+compatible: "zgmicro,ws9652a-mbox"
+include: [base.yaml, mailbox-controller.yaml]
+properties:
+  reg:
+    required: true
+  "#mbox-cells":
+    const: 1
+mbox-cells:
+  - channel

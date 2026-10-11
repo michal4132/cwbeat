@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+config WS9652A_PEER
+	bool "WS9652A retained peer control"
+	depends on DT_HAS_ZGMICRO_WS9652A_PEER_ENABLED
+	depends on WATCHDOG
+	select MFD_WS9652A
+	select WDT_WS9652A
+	select PINCTRL_WS9652A if SOC_WS9652A_CPUTOP
+	default y
+
+if WS9652A_PEER
+
+module = WS9652A_PEER
+module-str = ws9652a-peer
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # WS9652A_PEER

@@ -1,0 +1,13 @@
+sample:
+  name: CWbeat speaker
+  description: Zephyr TOP application using stock Go 4 BT and DSP peers
+common:
+  platform_allow:
+    - jbl_go4/ws9652a/cputop
+  tags:
+    - audio
+    - shell
+    - input
+tests:
+  app.cwbeat:
+    build_only: true

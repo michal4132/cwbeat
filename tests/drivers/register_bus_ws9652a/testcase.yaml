@@ -1,0 +1,10 @@
+tests:
+  cwbeat.drivers.register_bus_ws9652a:
+    platform_allow: [qemu_cortex_m3]
+    tags: [pmu, i2c]
+  cwbeat.drivers.register_bus_ws9652a.logging:
+    platform_allow: [qemu_cortex_m3]
+    tags: [pmu, i2c]
+    extra_configs:
+      - CONFIG_LOG=y
+      - CONFIG_LOG_MODE_IMMEDIATE=y

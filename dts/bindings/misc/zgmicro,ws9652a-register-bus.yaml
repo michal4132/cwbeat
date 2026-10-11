@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  Shared local serialization and gate for the WS9652A direct register bridge
+  and alternate I2C controller. A software admission flag records verified
+  peer hold and is closed under the same lock before peer release. This is
+  not a hardware semaphore or a cross-core arbitration protocol.
+compatible: "zgmicro,ws9652a-register-bus"
+include: base.yaml
+properties:
+  reg:
+    required: true
+    description: Bit-band gate alias shared by the two register engines.

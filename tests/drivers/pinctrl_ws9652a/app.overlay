@@ -1,0 +1,57 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/pinctrl/ws9652a-pinctrl.h>
+
+/ {
+	test_pinctrl: pinctrl@1014 {
+		compatible = "zgmicro,ws9652a-pinctrl";
+		reg = <0x1014 0x2c>, <0x1054 0x14>,
+		      <0x1000 0x40>, <0x1040 0x40>,
+		      <0x2000 0x80>, <0x2080 0x80>;
+		reg-names = "bank0", "bank1", "gpio0", "gpio1",
+			    "pin_output0", "pin_output1";
+
+		test_default: test-default {
+			bank1-input {
+				pinmux = <WS9652A_PINMUX(1, 1, WS9652A_FUNC_GPIO)>;
+				input-enable;
+			};
+			output-low {
+				pinmux = <WS9652A_PINMUX(0, 10, WS9652A_FUNC_GPIO)>;
+				output-low;
+			};
+			input-pull-down {
+				pinmux = <WS9652A_PINMUX(0, 9, WS9652A_FUNC_GPIO)>,
+					 <WS9652A_PINMUX(0, 11, WS9652A_FUNC_GPIO)>;
+				input-enable;
+				bias-pull-down;
+			};
+			input-unbiased {
+				pinmux = <WS9652A_PINMUX(0, 9, WS9652A_FUNC_GPIO)>;
+				input-enable;
+				bias-disable;
+			};
+		};
+		test_output: test-output {
+			preserve-latch {
+				pinmux = <WS9652A_PINMUX(0, 12, WS9652A_FUNC_GPIO)>;
+				output-enable;
+			};
+			set-latch {
+				pinmux = <WS9652A_PINMUX(0, 16, WS9652A_FUNC_GPIO)>;
+				output-high;
+				bias-pull-down;
+			};
+		};
+	};
+
+	test_consumer: test-consumer {
+		compatible = "zephyr,ws9652a-pinctrl-test";
+		pinctrl-0 = <&test_default>;
+		pinctrl-names = "default";
+	};
+	test_output_consumer: test-output-consumer {
+		compatible = "zephyr,ws9652a-pinctrl-test";
+		pinctrl-0 = <&test_output>;
+		pinctrl-names = "default";
+	};
+};

@@ -1,0 +1,8 @@
+tests:
+  cwbeat.drivers.mfd_ws9652a.runtime:
+    platform_allow: [qemu_cortex_m3]
+    tags: [pmu]
+  cwbeat.drivers.mfd_ws9652a.runtime_disabled:
+    platform_allow: [qemu_cortex_m3]
+    extra_args: [TEST_RUNTIME_READ=OFF]
+    tags: [pmu]

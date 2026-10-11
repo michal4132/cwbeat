@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config ADC_WS9652A
+	bool "Experimental WS9652A battery ADC"
+	depends on ADC && MFD_WS9652A
+	depends on DT_HAS_ZGMICRO_WS9652A_ADC_ENABLED
+	help
+	  Enable one fixed battery channel using the parent PMU transaction lock.
+	  The driver preserves the whole raw result byte; its effective resolution
+	  and voltage scale are unknown. The standard ADC API represents this as
+	  resolution 8 and returns a zero-extended uint16_t sample. Conversions
+	  require completed stock PMU preparation and write control registers.
+
+config ADC_WS9652A_INIT_PRIORITY
+	int "WS9652A ADC initialization priority"
+	depends on ADC_WS9652A
+	default 90
+	range MFD_INIT_PRIORITY 99
+	help
+	  Initialize after the parent PMU, including its generic I2C transport
+	  at POST_KERNEL MFD_INIT_PRIORITY. Equal priorities use devicetree
+	  dependency ordering. Initialization performs no register accesses.
+
+if ADC_WS9652A
+
+module = ADC_WS9652A
+module-str = adc-ws9652a
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # ADC_WS9652A

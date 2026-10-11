@@ -1,0 +1,6 @@
+description: GPIO test controller for audio startup and error handling
+compatible: "vnd,audio-test-gpio"
+include: gpio-controller.yaml
+gpio-cells:
+  - pin
+  - flags

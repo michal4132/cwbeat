@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config CWBEAT_BATTERY
+	bool "CWbeat stock battery sampling filter"
+	depends on ADC_WS9652A
+	help
+	  Read seven raw battery ADC samples and apply the stock trimmed mean,
+	  masking to six bits after averaging. This does not convert to voltage
+	  or percentage, or implement a charging policy.

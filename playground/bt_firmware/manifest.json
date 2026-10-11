@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "source_flash": "go4-before-bt-usb-clock-patch-20261012-230131.bin",
+  "source_flash_sha256": "a3e2192ba8c1d3ef39c3049a9648f35466f9d95aa9b66ae438eac2e861862968",
+  "source_bt_sha256": "e95e20967e694928df11cec42d36416662a79eb3f8afa2a35f027ef63bee518c",
+  "bt_flash_offset": 327680,
+  "bt_length": 905216,
+  "patches": [
+    {
+      "cpu_offset": 509092,
+      "flash_offset": 836772,
+      "old_hex": "00210846",
+      "new_hex": "5bf0acfd",
+      "purpose": "Site-specific BL guarded inherited-PLL adoption"
+    },
+    {
+      "cpu_offset": 884736,
+      "flash_offset": 1212416,
+      "old_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "new_hex": "3448864251d1042f4fd13348017d00294bd127a100202a580b589a4245d104302428f8d12d4800682d4908402d4988423bd12d480068052837d12c48006840f20111884231d12a48006810f0030f2cd12848006800f4c060b0f5c06f25d1264800682649884220d125480068254988421bd1254800682549884216d12448006800f47050b0f5006f0fd114480068144908401449884208d113480068052804d10d4801210175a4f707ba00210846704700b0710b0404040000b0710b80ba8c013307800000504140000f1012020000000000040000b0710b14960220400000401c000080100000805000004010000040a4000040008002402c800240330780003c8002400050414040800240000f101248800240",
+      "purpose": "Guarded stub and literals; mismatch returns intact native path"
+    }
+  ],
+  "patched_bt_sha256_before_metadata": "19c3635866247b6a2b54cf1b46768c3e3dafcc22876cd3fed953376bbc349e30",
+  "stub_length": 276,
+  "stub_sha256": "cb211fa1ad9c55c33df40623fab803f499779d85314f5e65d592c07aab6ee280",
+  "hardware_executed": false,
+  "scope": "Cold inherited64MHz PLL, exact192MHz record; warm starts fall back unchanged",
+  "checksums": "Integration helper updates lower BT descriptor CRC32/CRC16 in both metadata copies; no suffix change requested"
+}

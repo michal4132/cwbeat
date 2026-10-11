@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+
+rsource "pinctrl/Kconfig"
+rsource "gpio/Kconfig"
+rsource "board_id/Kconfig"
+rsource "usb/Kconfig"
+rsource "mfd/Kconfig"
+rsource "peer/Kconfig"
+rsource "mbox/Kconfig"
+rsource "misc/Kconfig"
+rsource "adc/Kconfig"
+rsource "clock_control/Kconfig"
+rsource "i2c/Kconfig"
+rsource "charger/Kconfig"
+rsource "watchdog/Kconfig"

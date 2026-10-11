@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config CHARGER_SC89619D
+	bool "Southchip SC89619D battery charger"
+	default y
+	depends on CHARGER
+	depends on DT_HAS_SOUTHCHIP_SC89619D_ENABLED
+	select I2C
+	select GPIO
+	help
+	  Read status and configure the SC89619D from devicetree. Unspecified
+	  settings are preserved. The enable-charging property holds charging
+	  disabled during configuration and enables it only after success.
+
+if CHARGER_SC89619D
+
+module = CHARGER_SC89619D
+module-str = charger-sc89619d
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # CHARGER_SC89619D
+
+config CHARGER_SHELL
+	bool "Charger shell commands"
+	depends on CHARGER && SHELL
+	help
+	  Inspect charger status and properties, configure supported current
+	  properties, and enable or disable charging through the charger API.
+	  Commands do not initialize devices or change bus ownership.

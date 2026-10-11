@@ -1,0 +1,20 @@
+manifest:
+  defaults:
+    remote: upstream
+
+  remotes:
+    - name: upstream
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      revision: e35b686be50a224e381fd35174be9fcb1a4ddd37
+      path: zephyr
+      import:
+        name-allowlist:
+          - cmsis_6
+          - segger
+      west-commands: scripts/west-commands.yml
+
+  self:
+    path: .

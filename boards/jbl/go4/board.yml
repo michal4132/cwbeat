@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+board:
+  name: jbl_go4
+  full_name: JBL Go 4 (TOP processor)
+  vendor: jbl
+  socs:
+    - name: ws9652a

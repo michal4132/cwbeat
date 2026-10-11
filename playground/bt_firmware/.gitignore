@@ -1,0 +1,11 @@
+# Keep firmware dumps, generated images and transaction records outside Git.
+__pycache__/
+*.pyc
+*.bin
+*.elf
+*.o
+/build/
+/plans/
+/runs/
+/proof.json
+/build-report.json

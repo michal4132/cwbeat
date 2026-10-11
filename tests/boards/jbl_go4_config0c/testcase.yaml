@@ -1,0 +1,11 @@
+tests:
+  cwbeat.boards.jbl_go4.config0c:
+    platform_allow:
+      - jbl_go4/ws9652a/cputop
+    integration_platforms:
+      - jbl_go4/ws9652a/cputop
+    build_only: true
+    tags:
+      - gpio
+      - pinctrl
+      - hardware

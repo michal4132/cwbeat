@@ -1,0 +1,13 @@
+description: Stock codec and type-1 audio control pins owned by the audio subsystem.
+compatible: "jbl,go4-audio"
+include: base.yaml
+
+properties:
+  codec-control-gpios:
+    type: phandle-array
+    required: true
+    description: Codec control output shared with the native power-mode service.
+  type1-control-gpios:
+    type: phandle-array
+    required: true
+    description: Additional control output used by type-1 boards.

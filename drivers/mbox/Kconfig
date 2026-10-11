@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+config MBOX_WS9652A
+	bool "WS9652A transmit signal mailbox"
+	depends on DT_HAS_ZGMICRO_WS9652A_MBOX_ENABLED
+	select MBOX
+	default y

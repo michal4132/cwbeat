@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A dedicated internal byte-register bridge. This controller provides
+  indexed reads and writes; it does not select the PMU backend or apply policy.
+compatible: "zgmicro,ws9652a-pmu-bridge"
+include: base.yaml
+bus: ws9652a-pmu-bridge
+properties:
+  reg:
+    required: true
+  register-bus:
+    type: phandle
+    required: true
+    description: Shared register-bus lock and gate provider.

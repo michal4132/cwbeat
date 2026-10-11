@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  WS9652A watchdog in the shared timer block. The driver supports disabling
+  the inherited watchdog and preserves the timer channels. Initialization
+  does not change hardware; disable also works before device initialization.
+
+compatible: "zgmicro,ws9652a-watchdog"
+
+include: base.yaml
+
+properties:
+  reg:
+    required: true

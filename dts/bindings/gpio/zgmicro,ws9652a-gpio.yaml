@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  GPIO support for the examined ZGMICRO WS9652A TOP controller. Consumers
+  select input or output direction through the standard GPIO API. ngpios
+  and gpio-reserved-ranges define valid pin offsets independently of direction.
+  Pad configuration uses the recovered pinctrl sequences. GPIO_PULL_DOWN
+  enables the pin's 22 kOhm pull-down on either bank; plain GPIO_INPUT and
+  GPIO_OUTPUT disable bias. Pull-up, open-drain/source and interrupts are
+  unsupported. Conflicting pull flags are invalid.
+  GPIO_ACTIVE_HIGH and GPIO_ACTIVE_LOW describe the consumer's logical
+  polarity. The provider clears the stock polarity field for inputs; raw
+  reads return physical levels, and Zephyr's logical GPIO API applies the
+  polarity configured from the GPIO devicetree flags exactly once.
+  GPIO0.0 has an independent Power input and power-hold latch. Configuring
+  this pin as an output preserves its input mode and bias; requesting a
+  pull-down with output mode on this special pin is unsupported. Configuring
+  it as an input selects bias while preserving its latch level.
+  Standard GPIO set operations change only output
+  latches, including on pins configured as inputs.
+
+compatible: "zgmicro,ws9652a-gpio"
+
+include: [gpio-controller.yaml, base.yaml]
+
+properties:
+  reg:
+    required: true
+  reg-names:
+    required: true
+  bank:
+    type: int
+    required: true
+    enum: [0, 1]
+  "#gpio-cells":
+    const: 2
+
+gpio-cells:
+  - pin
+  - flags

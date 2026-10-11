@@ -1,0 +1,4 @@
+config CWBEAT_UI
+ bool "Buttons, gestures and LED indication"
+ depends on ZBUS && INPUT && LED && CWBEAT_BLUETOOTH && CWBEAT_POWER
+ default y

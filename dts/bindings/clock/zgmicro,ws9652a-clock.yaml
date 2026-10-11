@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  WS9652A inherited core and peripheral bus clock controller. The driver reads
+  source, PLL selection and bus divider registers to report live rates. Clock
+  mutation and gate control are not supported. Clock IDs are defined in
+  zephyr/dt-bindings/clock/ws9652a-clock.h.
+
+compatible: "zgmicro,ws9652a-clock"
+
+include: [base.yaml, clock-controller.yaml]
+
+properties:
+  reg:
+    required: true
+
+  clocks:
+    required: true
+    description: |
+      Board crystal reference, represented by a fixed-clock provider. The
+      recovered PLL rate tables currently support only a 26 MHz reference.
+      Oscillator tuning and enable controls are not modeled.
+
+  clock-names:
+    required: true
+    const: [xtal]
+
+  "#clock-cells":
+    const: 1
+
+clock-cells:
+  - id

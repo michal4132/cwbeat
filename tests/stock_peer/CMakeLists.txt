@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20.0)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(stock_peer)
+target_sources(app PRIVATE src/main.c ../../subsys/stock_peer/private/wire.c ../../subsys/stock_peer/private/codec.c ../../subsys/stock_peer/private/transport.c)
+target_compile_definitions(app PRIVATE CONFIG_CWBEAT_STOCK_PEER_LOG_LEVEL=CONFIG_LOG_DEFAULT_LEVEL)

@@ -1,0 +1,4 @@
+tests:
+  cwbeat.drivers.mfd_ws9652a.i2c_only:
+    platform_allow: [qemu_cortex_m3]
+    tags: [i2c, mfd]

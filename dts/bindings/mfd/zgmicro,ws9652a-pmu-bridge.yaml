@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A PMU accessed through the dedicated byte-register bridge. The internal
+  I2C connection is used only when needed to select direct mode through C7.
+compatible: "zgmicro,ws9652a-pmu"
+on-bus: ws9652a-pmu-bridge
+include: ws9652a-pmu-common.yaml
+properties:
+  bootstrap-i2c-bus:
+    type: phandle
+    required: true
+    description: Internal I2C bus reaching this same PMU at fixed address 0x34.

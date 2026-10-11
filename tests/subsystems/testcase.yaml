@@ -1,0 +1,10 @@
+tests:
+  cwbeat.subsystems.pending_mode4_stop:
+    tags: [cwbeat, integration]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]
+  cwbeat.subsystems.complete_startup:
+    tags: [cwbeat, integration]
+    extra_args: [TEST_COMPLETE_STARTUP=ON]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]

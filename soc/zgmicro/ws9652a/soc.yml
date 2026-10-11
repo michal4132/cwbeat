@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+socs:
+  - name: ws9652a
+    cpuclusters:
+      - name: cputop
+# The architecture also has BT and DSP processors. Reserve the qualifier
+# names cpubt and cpudsp for future ports; neither is advertised as a Zephyr
+# build target while those processors run their unchanged stock firmware.

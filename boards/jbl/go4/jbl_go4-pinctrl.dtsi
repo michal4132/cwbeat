@@ -1,0 +1,40 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/pinctrl/ws9652a-pinctrl.h>
+
+&pinctrl {
+	i2c0_default: i2c0-default {
+		bus-pins {
+			pinmux = <WS9652A_PINMUX(0, 7, WS9652A_FUNC_I2C0)>,
+				 <WS9652A_PINMUX(0, 8, WS9652A_FUNC_I2C0)>;
+		};
+	};
+
+	/* Stock defaults without a runtime owner, applied only while BT is held.
+	 * Group order retains GPIO9's pull-down-enable then pull-down-disable sequence.
+	 * Explicit output levels are written after all groups are configured.
+	 */
+	peer_default: peer-default {
+		unidentified-bank1-input {
+			pinmux = <WS9652A_PINMUX(1, 1, WS9652A_FUNC_GPIO)>;
+			input-enable;
+			bias-pull-down;
+		};
+		charging-control {
+			/* Stock boot level, before the deferred charger takes ownership. */
+			pinmux = <WS9652A_PINMUX(0, 10, WS9652A_FUNC_GPIO)>;
+			output-low;
+		};
+		boot-inputs {
+			/* GPIO9: USB present (high); GPIO11: charger /INT pulses (low). */
+			pinmux = <WS9652A_PINMUX(0, 9, WS9652A_FUNC_GPIO)>,
+				 <WS9652A_PINMUX(0, 11, WS9652A_FUNC_GPIO)>;
+			input-enable;
+			bias-pull-down;
+		};
+		wake-input-profile {
+			pinmux = <WS9652A_PINMUX(0, 9, WS9652A_FUNC_GPIO)>;
+			input-enable;
+			bias-disable;
+		};
+	};
+};

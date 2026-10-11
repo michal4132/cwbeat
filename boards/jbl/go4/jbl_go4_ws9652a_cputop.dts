@@ -1,0 +1,169 @@
+/*
+ * Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <zgmicro/ws9652a_cputop.dtsi>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include "jbl_go4-pinctrl.dtsi"
+
+/ {
+	model = "JBL Go 4 TOP";
+	compatible = "jbl,go4";
+
+	xtal: clock-xtal {
+		compatible = "fixed-clock";
+		clock-frequency = <26000000>;
+		#clock-cells = <0>;
+	};
+
+	power_controls: power-controls {
+		compatible = "jbl,go4-power";
+		hold-gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+		latch-clear-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+	};
+
+	go4_ipc: stock-ipc {
+		compatible = "jbl,go4-stock-ipc";
+		memory-region = <&peer_shm>;
+		peer-controller = <&peer_ctrl>;
+		board-id = <&board_id>;
+		mboxes = <&peer_mbox 0>;
+		mbox-names = "tx";
+	};
+
+	audio_controls: audio-controls {
+		compatible = "jbl,go4-audio";
+		codec-control-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+		type1-control-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+	};
+
+	board_id: board-id {
+		compatible = "gpio-board-id";
+		/* External straps: GPIO_INPUT keeps the internal 22 kOhm pull-downs off. */
+		gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>, <&gpio0 21 GPIO_ACTIVE_HIGH>;
+		/* Raw bits 00, 01, 10, 11 map to stock board types 4, 2, 1, 3. */
+		id-values = <4 2 1 3>;
+		sample-count = <3>;
+		sample-interval-us = <10>;
+		/* Sample only after peer preparation, before BT takes over GPIO21. */
+		zephyr,deferred-init;
+	};
+
+	chosen {
+		cwbeat,charger = &charger;
+		cwbeat,leds = &leds;
+		cwbeat,buttons = &buttons;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
+	};
+
+	aliases {
+		led0 = &led_channel_a;
+		led1 = &led_channel_b;
+		sw0 = &play_button;
+		sw1 = &bluetooth_button;
+		sw2 = &volume_up_button;
+		sw3 = &volume_down_button;
+		sw4 = &power_button;
+		sw5 = &mode_button;
+	};
+
+	leds: leds {
+		compatible = "gpio-leds";
+		/* Channel names avoid assuming undocumented optical polarity. */
+		led_channel_a: led-channel-a {
+			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
+		};
+		led_channel_b: led-channel-b {
+			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	buttons: buttons {
+		compatible = "gpio-keys";
+		polling-mode;
+		debounce-interval-ms = <20>;
+		zephyr,suspend-action = "none";
+
+		play_button: play {
+			gpios = <&gpio0 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_PLAYPAUSE>;
+		};
+		bluetooth_button: bluetooth {
+			gpios = <&gpio0 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_BLUETOOTH>;
+		};
+		volume_up_button: volume-up {
+			gpios = <&gpio0 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_VOLUMEUP>;
+		};
+		volume_down_button: volume-down {
+			gpios = <&gpio0 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_VOLUMEDOWN>;
+		};
+		power_button: power {
+			gpios = <&gpio0 0 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_POWER>;
+		};
+		mode_button: mode {
+			gpios = <&gpio0 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			zephyr,code = <INPUT_KEY_CONNECT>;
+		};
+	};
+};
+
+&clkctrl {
+	clocks = <&xtal>;
+	clock-names = "xtal";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&peer_ctrl {
+	/* Deferred until successful peer hold and PMU preparation. */
+	pinctrl-0 = <&peer_default>;
+	pinctrl-names = "default";
+};
+
+&usb0 {
+	status = "okay";
+
+	usb_serial: cdc-acm-uart {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CWbeat console";
+		tx-fifo-size = <512>;
+		rx-fifo-size = <256>;
+	};
+};
+
+&pmu_adc {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+
+	charger: charger@6a {
+		compatible = "southchip,sc89619d";
+		reg = <0x6a>;
+		int-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+		/* Recovered type-1 TOP charge-control sequence; net not continuity-tested. */
+		ce-gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+		#include "jbl_go4-charger.dtsi"
+		/* Probe after type-1 detection, while BT/DSP remain held. */
+		zephyr,deferred-init;
+	};
+};

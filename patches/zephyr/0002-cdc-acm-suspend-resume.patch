@@ -1,0 +1,428 @@
+diff --git a/subsys/usb/device_next/class/usbd_cdc_acm.c b/subsys/usb/device_next/class/usbd_cdc_acm.c
+index 3957daa167b68682d836f2b2187543b7d3acc098..3e1f876a94333c06415f3e144e1e7ad50e2d8fe2 100644
+--- a/subsys/usb/device_next/class/usbd_cdc_acm.c
++++ b/subsys/usb/device_next/class/usbd_cdc_acm.c
+@@ -268,7 +268,9 @@ static uint32_t cdc_acm_tx_fifo_space_get(struct cdc_acm_uart_data *const data)
+ 
+ 	if (available == 0) {
+ 		space = 0;
+-	} else if (available == 1 || !data->echo_mitigated) {
++	} else if (available == 1 || !data->echo_mitigated ||
++		   atomic_test_bit(&data->state, CDC_ACM_CLASS_SUSPENDED)) {
++		/* A suspended transfer cannot rotate the current buffer. */
+ 		space = cdc_acm_tx_current_tailroom_locked(data);
+ 	} else {
+ 		/* Use available - 1 to prevent sudden drop of available
+@@ -453,6 +455,23 @@ static void usbd_cdc_acm_resumed(struct usbd_class_data *const c_data)
+ 	struct cdc_acm_uart_data *data = dev->data;
+ 
+ 	atomic_clear_bit(&data->state, CDC_ACM_CLASS_SUSPENDED);
++
++	if (!atomic_test_bit(&data->state, CDC_ACM_CLASS_ENABLED)) {
++		return;
++	}
++
++	/* Work that ran while suspended returned without requeueing itself. */
++	if (atomic_test_bit(&data->state, CDC_ACM_IRQ_RX_ENABLED) || data->cb == NULL) {
++		cdc_acm_work_submit(&data->rx_fifo_work);
++	}
++
++	cdc_acm_work_schedule(&data->tx_fifo_work, K_NO_WAIT);
++
++	if (data->cb != NULL &&
++	    (atomic_test_bit(&data->state, CDC_ACM_IRQ_RX_ENABLED) ||
++	     atomic_test_bit(&data->state, CDC_ACM_IRQ_TX_ENABLED))) {
++		cdc_acm_work_submit(&data->irq_cb_work);
++	}
+ }
+ 
+ static const void *usbd_cdc_acm_get_desc(struct usbd_class_data *const c_data,
+@@ -795,7 +814,7 @@ static void cdc_acm_tx_fifo_handler(struct k_work *work)
+  *  - (x) RX transfer completion
+  *  - (x) the end of cdc_acm_irq_cb_handler
+  *  - (x) USBD class API enable call
+- *  - ( ) USBD class API resumed call (TODO)
++ *  - (x) USBD class API resumed call
+  */
+ static void cdc_acm_rx_fifo_handler(struct k_work *work)
+ {
+diff --git a/tests/subsys/usb/cdc_acm/CMakeLists.txt b/tests/subsys/usb/cdc_acm/CMakeLists.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..21d071125c8fb65993900958a47cd65e8b551555
+--- /dev/null
++++ b/tests/subsys/usb/cdc_acm/CMakeLists.txt
+@@ -0,0 +1,10 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors
++
++cmake_minimum_required(VERSION 3.28.0)
++
++find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
++project(usbd_cdc_acm)
++
++target_include_directories(app PRIVATE "${ZEPHYR_BASE}/subsys/usb/device_next")
++target_sources(app PRIVATE src/main.c)
+diff --git a/tests/subsys/usb/cdc_acm/prj.conf b/tests/subsys/usb/cdc_acm/prj.conf
+new file mode 100644
+index 0000000000000000000000000000000000000000..b9338cf0588ec90ec95eb1dc389a3100433fa2e6
+--- /dev/null
++++ b/tests/subsys/usb/cdc_acm/prj.conf
+@@ -0,0 +1,9 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors
++
++CONFIG_ZTEST=y
++CONFIG_USB_DEVICE_STACK_NEXT=y
++CONFIG_UDC_BUF_POOL_SIZE=4096
++CONFIG_UART_INTERRUPT_DRIVEN=y
++CONFIG_MAIN_STACK_SIZE=2048
++CONFIG_TEST_EXTRA_STACK_SIZE=2048
+diff --git a/tests/subsys/usb/cdc_acm/src/main.c b/tests/subsys/usb/cdc_acm/src/main.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..413d0f404d48a01f6523df93b1f74815ed2706a6
+--- /dev/null
++++ b/tests/subsys/usb/cdc_acm/src/main.c
+@@ -0,0 +1,325 @@
++/* SPDX-License-Identifier: Apache-2.0 */
++/* SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors */
++#include <zephyr/kernel.h>
++#include <zephyr/ztest.h>
++#include <zephyr/drivers/uart.h>
++#include <zephyr/drivers/usb/udc.h>
++#include <zephyr/usb/usbd.h>
++
++static int work_submit(struct k_work *work);
++static int work_schedule(struct k_work_delayable *work, k_timeout_t delay);
++static int ep_enqueue(struct usbd_class_data *const c_data, struct net_buf *const buf);
++
++/* No CDC devicetree instance is needed: construct the class below with real
++ * net_buf pools, UART callbacks and FIFO operations. Replace only endpoint
++ * submission and work scheduling so a callback loop fails instead of hanging
++ * the system workqueue. Supply the class defaults normally enabled by its DT
++ * instance; no class logging is required for these tests.
++ */
++#define CONFIG_USBD_CDC_ACM_LOG_LEVEL 0
++#define CONFIG_USBD_CDC_ACM_TX_DELAY_MS 100
++#define k_work_submit work_submit
++#define k_work_schedule work_schedule
++#define usbd_ep_enqueue ep_enqueue
++#include "class/usbd_cdc_acm.c"
++#undef k_work_submit
++#undef k_work_schedule
++#undef usbd_ep_enqueue
++
++#define BULK_IN 0x82U
++#define BULK_OUT 0x02U
++#define BUFFER_COUNT 4U
++#define BUFFER_SIZE 64U
++#define WORK_LIMIT 32U
++
++UDC_BUF_POOL_DEFINE(tx_pool, BUFFER_COUNT, BUFFER_SIZE, sizeof(struct udc_buf_info), NULL);
++UDC_BUF_POOL_DEFINE(rx_pool, BUFFER_COUNT, BUFFER_SIZE, sizeof(struct udc_buf_info), NULL);
++
++static struct k_fifo rx_bufs;
++static struct cdc_acm_uart_data uart_data;
++static struct usbd_context context;
++static struct usbd_class_data class_data;
++static struct usbd_cdc_acm_desc descriptors = {
++	.if0_int_ep.bEndpointAddress = 0x81U,
++	.if1_in_ep.bEndpointAddress = BULK_IN,
++	.if1_out_ep.bEndpointAddress = BULK_OUT,
++};
++static const struct cdc_acm_uart_config uart_config = {
++	.c_data = &class_data,
++	.desc = &descriptors,
++};
++static const struct device uart_dev = {
++	.name = "test_cdc_acm",
++	.config = &uart_config,
++	.data = &uart_data,
++	.api = &cdc_acm_uart_api,
++};
++static struct {
++	struct k_work *work[3];
++	uint32_t work_count;
++	uint32_t callbacks;
++	uint32_t tx_bytes;
++	uint32_t rx_bytes;
++	uint32_t tx_pending;
++	uint32_t enqueued_in;
++	uint32_t enqueued_out;
++	struct net_buf *submitted[2 * BUFFER_COUNT];
++	size_t submitted_count;
++} fake;
++
++static int work_submit(struct k_work *work)
++{
++	zassert_true(work == &uart_data.irq_cb_work || work == &uart_data.rx_fifo_work ||
++		     work == &uart_data.tx_fifo_work.work);
++
++	for (uint32_t i = 0; i < fake.work_count; i++) {
++		if (fake.work[i] == work) {
++			return 0;
++		}
++	}
++
++	zassert_true(fake.work_count < ARRAY_SIZE(fake.work));
++	fake.work[fake.work_count++] = work;
++
++	return 1;
++}
++
++static int work_schedule(struct k_work_delayable *work, k_timeout_t delay)
++{
++	/* Echo mitigation is complete and all exercised transfers have buffers,
++	 * so the production paths under test only schedule immediate work.
++	 */
++	zassert_true(K_TIMEOUT_EQ(delay, K_NO_WAIT));
++	return work_submit(&work->work);
++}
++
++static int ep_enqueue(struct usbd_class_data *const c_data, struct net_buf *const buf)
++{
++	zassert_equal_ptr(c_data, &class_data);
++	zassert_true(fake.submitted_count < ARRAY_SIZE(fake.submitted));
++	fake.submitted[fake.submitted_count++] = buf;
++
++	if (udc_get_buf_info(buf)->ep == BULK_IN) {
++		fake.enqueued_in++;
++	} else if (udc_get_buf_info(buf)->ep == BULK_OUT) {
++		fake.enqueued_out++;
++	} else {
++		zassert_unreachable("Unexpected endpoint");
++	}
++
++	return 0;
++}
++
++static void uart_callback(const struct device *dev, void *unused)
++{
++	static const uint8_t tx_data[8] = {'1', '2', '3', '4', '5', '6', '7', '8'};
++	uint8_t rx_data[BUFFER_SIZE];
++	int ret;
++
++	ARG_UNUSED(unused);
++	fake.callbacks++;
++	cdc_acm_irq_update(dev);
++
++	if (cdc_acm_irq_rx_ready(dev) != 0) {
++		ret = cdc_acm_fifo_read(dev, rx_data, sizeof(rx_data));
++		zassert_true(ret >= 0);
++		fake.rx_bytes += ret;
++	}
++
++	if (cdc_acm_irq_tx_ready(dev) != 0) {
++		if (fake.tx_pending != 0U) {
++			ret = cdc_acm_fifo_fill(dev, tx_data,
++					      MIN(sizeof(tx_data), fake.tx_pending));
++			zassert_true(ret >= 0);
++			fake.tx_bytes += ret;
++			fake.tx_pending -= ret;
++		} else {
++			cdc_acm_irq_tx_disable(dev);
++		}
++	}
++}
++
++static uint32_t run_work(void)
++{
++	uint32_t steps = 0U;
++
++	while (steps < WORK_LIMIT && fake.work_count != 0U) {
++		struct k_work *work = fake.work[0];
++
++		fake.work_count--;
++		memmove(fake.work, fake.work + 1, fake.work_count * sizeof(fake.work[0]));
++		work->handler(work);
++		steps++;
++	}
++
++	return steps;
++}
++
++static void before(void *unused)
++{
++	ARG_UNUSED(unused);
++	memset(&fake, 0, sizeof(fake));
++	memset(&uart_data, 0, sizeof(uart_data));
++	memset(&context, 0, sizeof(context));
++	class_data = (struct usbd_class_data){
++		.name = "test_cdc_acm",
++		.uds_ctx = &context,
++		.priv = (void *)&uart_dev,
++		.api = &usbd_cdc_acm_api,
++	};
++	k_fifo_init(&rx_bufs);
++	uart_data.dev = &uart_dev;
++	uart_data.tx_fifo.pool = &tx_pool;
++	uart_data.rx_fifo.pool = &rx_pool;
++	uart_data.rx_fifo.bufs = &rx_bufs;
++	uart_data.cb = uart_callback;
++	uart_data.line_coding = (struct cdc_acm_line_coding)CDC_ACM_DEFAULT_LINECODING;
++	zassert_ok(usbd_cdc_acm_preinit(&uart_dev));
++	zassert_not_null(uart_data.tx_fifo.current);
++	uart_data.echo_mitigated = true;
++	atomic_set_bit(&uart_data.state, CDC_ACM_CLASS_ENABLED);
++	usbd_cdc_acm_suspended(&class_data);
++}
++
++static void after(void *unused)
++{
++	struct net_buf *buf;
++
++	ARG_UNUSED(unused);
++	if (uart_data.tx_fifo.current != NULL) {
++		net_buf_unref(uart_data.tx_fifo.current);
++	}
++	while ((buf = k_fifo_get(&rx_bufs, K_NO_WAIT)) != NULL) {
++		net_buf_unref(buf);
++	}
++	for (size_t i = 0; i < fake.submitted_count; i++) {
++		net_buf_unref(fake.submitted[i]);
++	}
++}
++
++ZTEST(cdc_acm_suspend, test_full_tx_buffer_does_not_spin)
++{
++	memset(net_buf_add(uart_data.tx_fifo.current, BUFFER_SIZE), 'x', BUFFER_SIZE);
++	fake.tx_pending = 8U;
++	cdc_acm_irq_tx_enable(&uart_dev);
++	run_work();
++
++	zassert_equal(fake.work_count, 0, "Suspended TX keeps submitting callbacks");
++	zassert_equal(fake.tx_bytes, 0);
++	zassert_equal(fake.enqueued_in, 0);
++	zassert_equal(cdc_acm_tx_fifo_space_get(&uart_data), 0);
++}
++
++ZTEST(cdc_acm_suspend, test_suspended_tx_uses_remaining_tailroom)
++{
++	memset(net_buf_add(uart_data.tx_fifo.current, BUFFER_SIZE - 4U), 'x', BUFFER_SIZE - 4U);
++	fake.tx_pending = 8U;
++	cdc_acm_irq_tx_enable(&uart_dev);
++	run_work();
++
++	zassert_equal(fake.work_count, 0, "Suspended TX keeps submitting callbacks");
++	zassert_equal(fake.tx_bytes, 4);
++	zassert_equal(fake.tx_pending, 4);
++	zassert_equal(fake.enqueued_in, 0);
++	zassert_equal(uart_data.tx_fifo.current->len, BUFFER_SIZE);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_restarts_pending_tx)
++{
++	net_buf_add_mem(uart_data.tx_fifo.current, "pending", 7);
++	cdc_acm_work_schedule(&uart_data.tx_fifo_work, K_NO_WAIT);
++	zassert_equal(run_work(), 1);
++	zassert_equal(fake.enqueued_in, 0);
++
++	usbd_cdc_acm_resumed(&class_data);
++	run_work();
++
++	zassert_equal(fake.enqueued_in, 1, "Resume did not restart buffered TX");
++	zassert_equal(fake.submitted[0]->len, 7);
++	zassert_mem_equal(fake.submitted[0]->data, "pending", 7);
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_rearms_rx)
++{
++	atomic_set_bit(&uart_data.state, CDC_ACM_IRQ_RX_ENABLED);
++	cdc_acm_work_submit(&uart_data.rx_fifo_work);
++	zassert_equal(run_work(), 1);
++	zassert_equal(fake.enqueued_out, 0);
++
++	usbd_cdc_acm_resumed(&class_data);
++	run_work();
++
++	zassert_equal(fake.enqueued_out, BUFFER_COUNT, "Resume did not rearm RX");
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_rearms_polling_rx)
++{
++	uart_data.cb = NULL;
++	cdc_acm_work_submit(&uart_data.rx_fifo_work);
++	zassert_equal(run_work(), 1);
++
++	usbd_cdc_acm_resumed(&class_data);
++	run_work();
++
++	zassert_equal(fake.enqueued_out, BUFFER_COUNT, "Resume did not rearm polling RX");
++	zassert_equal(fake.callbacks, 0);
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_keeps_irqs_disabled)
++{
++	net_buf_add_mem(uart_data.tx_fifo.current, "pending", 7);
++	usbd_cdc_acm_resumed(&class_data);
++	run_work();
++
++	zassert_equal(fake.enqueued_in, 1);
++	zassert_equal(fake.enqueued_out, 0);
++	zassert_equal(fake.callbacks, 0);
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_restarts_enabled_tx_irq)
++{
++	memset(net_buf_add(uart_data.tx_fifo.current, BUFFER_SIZE), 'x', BUFFER_SIZE);
++	fake.tx_pending = 8U;
++	cdc_acm_irq_tx_enable(&uart_dev);
++	run_work();
++
++	usbd_cdc_acm_resumed(&class_data);
++	run_work();
++
++	zassert_equal(fake.enqueued_in, 1);
++	zassert_equal(fake.tx_bytes, 8, "Resume did not restart the TX callback");
++	zassert_equal(fake.tx_pending, 0);
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST(cdc_acm_suspend, test_resume_does_not_restart_disabled_class)
++{
++	atomic_set_bit(&uart_data.state, CDC_ACM_IRQ_RX_ENABLED);
++	atomic_set_bit(&uart_data.state, CDC_ACM_IRQ_TX_ENABLED);
++	usbd_cdc_acm_disable(&class_data);
++	usbd_cdc_acm_resumed(&class_data);
++
++	zassert_equal(fake.work_count, 0);
++	zassert_false(atomic_test_bit(&uart_data.state, CDC_ACM_CLASS_SUSPENDED));
++}
++
++ZTEST(cdc_acm_suspend, test_suspended_rx_can_drain_buffered_data)
++{
++	struct net_buf *buf = net_buf_alloc(&rx_pool, K_NO_WAIT);
++
++	zassert_not_null(buf);
++	net_buf_add_mem(buf, "data", 4);
++	k_fifo_put(&rx_bufs, buf);
++	cdc_acm_irq_rx_enable(&uart_dev);
++	run_work();
++
++	zassert_equal(fake.rx_bytes, 4);
++	zassert_equal(fake.enqueued_out, 0);
++	zassert_equal(fake.work_count, 0);
++}
++
++ZTEST_SUITE(cdc_acm_suspend, NULL, NULL, before, after, NULL);
+diff --git a/tests/subsys/usb/cdc_acm/tests.yaml b/tests/subsys/usb/cdc_acm/tests.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..d32654c266dc860e0f0a95178bbb963efaf32d96
+--- /dev/null
++++ b/tests/subsys/usb/cdc_acm/tests.yaml
+@@ -0,0 +1,12 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors
++
++tests:
++  usb.cdc_acm.suspend:
++    platform_allow:
++      - qemu_cortex_m3
++    integration_platforms:
++      - qemu_cortex_m3
++    tags:
++      - usb
++      - uart

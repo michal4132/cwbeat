@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Board identifier encoded by GPIO straps. The first GPIO supplies bit 0, the
+  second bit 1, and so on, using logical GPIO levels (including active-low
+  polarity). The resulting bit pattern is the identifier unless id-values supplies
+  a lookup table. Zero is a valid identifier.
+
+  Initialization configures every GPIO as an input using the bias flags in its
+  GPIO specifier. It does not add an implicit pull.
+  Each pin is sampled sample-count times in succession; disagreement fails
+  initialization. A successful identifier is cached for the rest of the boot.
+
+  Use zephyr,deferred-init when hardware preparation must precede sampling.
+  The application then calls device_init() after the GPIO controllers are
+  ready and before another peripheral takes ownership of these pins.
+
+compatible: "gpio-board-id"
+
+include: base.yaml
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      One to 32 identification GPIOs, ordered from least to most significant
+      bit. GPIOs may use different controllers and active-low polarity. Specify
+      GPIO_PULL_UP or GPIO_PULL_DOWN only when the strap requires that internal
+      bias; omit both for externally biased straps.
+
+  sample-count:
+    type: int
+    default: 1
+    min: 1
+    max: 255
+    description: Number of identical consecutive samples required for each pin.
+
+  sample-interval-us:
+    type: int
+    default: 0
+    min: 0
+    description: Busy-wait interval between successive samples of the same pin.
+
+  id-values:
+    type: array
+    description: |
+      Optional identifiers indexed by the sampled GPIO bit pattern. This must
+      contain exactly 2^N entries, where N is the number of GPIOs. For example,
+      two GPIOs require four entries ordered for bit patterns 00, 01, 10, 11.

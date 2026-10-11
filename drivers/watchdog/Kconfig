@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config WDT_WS9652A
+	bool "WS9652A watchdog"
+	default y
+	depends on WATCHDOG
+	depends on DT_HAS_ZGMICRO_WS9652A_WATCHDOG_ENABLED
+	help
+	  Disable the inherited watchdog using the recovered stock sequence.
+	  Timeout installation, setup and feeding are not supported yet.
+	  Initialization leaves hardware unchanged; peer and board lifecycle
+	  code explicitly decide when to stop the watchdog.

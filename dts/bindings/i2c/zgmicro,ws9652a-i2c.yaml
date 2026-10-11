@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A routed I2C register controller. Child channels select external route
+  0 or internal route 1. The parent owns one register bank and transfer engine.
+  The register-bus provider owns the shared transfer gate and serializes access
+  against peer release and direct PMU transactions. No PMU readiness or backend
+  selection is required by this controller. Initialization does not touch MMIO.
+
+compatible: "zgmicro,ws9652a-i2c"
+include: base.yaml
+
+properties:
+  reg:
+    required: true
+  reg-names:
+    required: true
+    description: "Single register region named controller."
+  clocks:
+    required: true
+  clock-names:
+    required: true
+    description: "Clock outputs in order: core, bus."
+  register-bus:
+    type: phandle
+    required: true
+    description: Shared transfer gate, mutex and peers-held permission provider.
+  "#address-cells":
+    type: int
+    required: true
+    const: 1
+  "#size-cells":
+    type: int
+    required: true
+    const: 0

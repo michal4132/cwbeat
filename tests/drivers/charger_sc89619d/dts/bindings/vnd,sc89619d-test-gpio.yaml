@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Scripted GPIO controller for SC89619D charger tests
+compatible: "vnd,sc89619d-test-gpio"
+include: [base.yaml, gpio-controller.yaml]
+gpio-cells:
+  - pin
+  - flags

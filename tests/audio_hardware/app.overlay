@@ -1,0 +1,22 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	codec_gpio: codec-gpio {
+		compatible = "vnd,audio-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	type1_gpio: type1-gpio {
+		compatible = "vnd,audio-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	audio_controls: audio-controls {
+		compatible = "jbl,go4-audio";
+		codec-control-gpios = <&codec_gpio 16 GPIO_ACTIVE_HIGH>;
+		type1-control-gpios = <&type1_gpio 12 GPIO_ACTIVE_HIGH>;
+	};
+};

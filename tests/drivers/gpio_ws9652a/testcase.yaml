@@ -1,0 +1,6 @@
+tests:
+  cwbeat.drivers.gpio_ws9652a:
+    platform_allow:
+      - qemu_cortex_m3
+    tags:
+      - gpio

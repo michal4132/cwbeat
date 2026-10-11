@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  JBL Go 4 power latch controls. The power-hold latch is independent of
+  the Power button input on GPIO0.0. The stock shutdown sequence also
+  clears the GPIO0.3 latch without changing the Play button's input mode.
+  Pin direction and shutdown sequencing are selected by board code.
+
+compatible: "jbl,go4-power"
+
+include: base.yaml
+
+properties:
+  hold-gpios:
+    type: phandle-array
+    required: true
+    description: Power-hold latch, active high.
+  latch-clear-gpios:
+    type: phandle-array
+    required: true
+    description: |
+      Output latch forced physically low during terminal shutdown, without
+      changing pin direction or mux. GPIO polarity flags do not affect the clear.

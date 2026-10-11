@@ -1,0 +1,174 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Southchip SC89619D single-cell switching charger with NVDC power path
+  and USB DP/DM source detection. Its fixed 7-bit I2C address is 0x6a.
+  Initialization programs only explicitly supplied settings. Other fields,
+  including voltage fine trim in register 0x0d, retain their inherited values.
+
+compatible: "southchip,sc89619d"
+
+include: i2c-device.yaml
+
+properties:
+  int-gpios:
+    type: phandle-array
+    description: |
+      Optional GPIO connected to the charger's open-drain /INT output.
+      Use GPIO_ACTIVE_LOW. The charger sends a low pulse to report status
+      changes and faults. The line requires an external pull-up.
+
+  ce-gpios:
+    type: phandle-array
+    description: |
+      Optional active-low charge-enable input (/CE). Use GPIO_ACTIVE_LOW.
+      Unless enable-charging is specified, initialization configures the pin
+      as an output without changing its inherited output latch. With
+      enable-charging, /CE is inactive until configuration succeeds.
+      The charger driver must own this GPIO.
+
+  enable-charging:
+    type: boolean
+    description: |
+      Enable charging after applying all initial settings. Charging is held
+      disabled during configuration using /CE, or CHG_CFG if /CE is absent.
+      Once that gate is disabled, a configuration failure leaves it disabled.
+      Validation and identity-check failures preserve the inherited state.
+      When omitted, inherited charge enable state is preserved.
+
+  constant-charge-current-max-microamp:
+    type: int
+    description: |
+      Optional initial constant charging current, 0 to 1260000 microamps.
+      Rounded down to a 20000-microamp step. Zero disables charging current.
+
+  precharge-current-microamp:
+    type: int
+    description: |
+      Optional initial trickle charging current, 20000 to 320000 microamps.
+      Rounded down to a 20000-microamp step.
+
+  charge-term-current-microamp:
+    type: int
+    description: |
+      Optional initial termination current, 20000 to 320000 microamps.
+      Rounded down to a 20000-microamp step.
+
+  input-current-limit-microamp:
+    type: int
+    description: |
+      Optional initial input current limit, 100000 to 3200000 microamps.
+      Rounded down to a 100000-microamp step. Automatic USB source detection
+      can subsequently replace this limit.
+
+  southchip,high-impedance-mode:
+    type: string
+    enum: ["disabled", "enabled"]
+    description: Initial input Hi-Z mode (EN_HIZ).
+
+  southchip,stat-pin-mode:
+    type: string
+    enum: ["enabled", "disabled"]
+    description: Enable or disable the STAT pin function.
+
+  boost-current-limit-microamp:
+    type: int
+    enum: [500000, 1200000]
+    description: Initial boost current limit. This does not enable OTG mode.
+
+  southchip,charge-voltage-base-microvolt:
+    type: int
+    description: |
+      Initial coarse charge voltage, 3848000 to 4840000 microvolts in exact
+      32000-microvolt steps. Existing register 0x0d fine trim is preserved
+      and adds 0, 8000, 16000 or 24000 microvolts to this base.
+
+  re-charge-threshold-microvolt:
+    type: int
+    enum: [100000, 200000]
+    description: Voltage drop below the regulation target that triggers recharge.
+
+  top-off-time-minutes:
+    type: int
+    enum: [0, 15, 30, 45]
+    description: Initial top-off timer duration. Zero disables it.
+
+  charge-termination:
+    type: string
+    enum: ["disabled", "enabled"]
+    description: Initial charge termination enable (EN_TERM).
+
+  watchdog-timeout-ms:
+    type: int
+    enum: [0, 40000, 80000, 160000]
+    description: Initial I2C watchdog timeout. Zero disables the watchdog.
+
+  charge-safety-timer-hours:
+    type: int
+    enum: [0, 5, 10]
+    description: Initial charging safety timer duration. Zero disables it.
+
+  thermal-regulation-celsius:
+    type: int
+    enum: [90, 110]
+    description: Initial junction thermal regulation threshold.
+
+  jeita-cool-current-percent:
+    type: int
+    enum: [50, 20, 100, 0]
+    description: |
+      Percentage of charge current in the cool region. Zero stops charging.
+      Configures both JEITA_COOL_ISET1 and JEITA_COOL_ISET2.
+
+  jeita-warm-current-percent:
+    type: int
+    enum: [0, 20, 50, 100]
+    description: Percentage of charge current in the warm region. Zero stops charging.
+
+  jeita-cool-temperature-millicelsius:
+    type: int
+    enum: [5000, 10000, 15000, 20000]
+    description: Datasheet nominal cool threshold; actual temperature depends on the NTC network.
+
+  jeita-warm-temperature-millicelsius:
+    type: int
+    enum: [40000, 44500, 50500, 54500]
+    description: Datasheet nominal warm threshold; actual temperature depends on the NTC network.
+
+  southchip,jeita-warm-voltage-mode:
+    type: string
+    enum: ["coarse", "fine"]
+    description: |
+      JEITA_WARM_VSET2 selection. Coarse uses the inherited REG07 bit 4
+      selection; fine selects a 100 mV or 50 mV reduction using that bit.
+      REG07 is preserved in both cases.
+
+  precharge-voltage-threshold-microvolt:
+    type: int
+    enum: [3000000, 2800000]
+    description: Battery voltage threshold between precharge and constant-current charging.
+
+  southchip,auto-dpdm:
+    type: string
+    enum: ["disabled", "enabled"]
+    description: Automatic USB source detection when VBUS is plugged in.
+
+  buck-frequency-hz:
+    type: int
+    enum: [1000000, 1500000]
+    description: Initial buck switching frequency.
+
+  boost-frequency-hz:
+    type: int
+    enum: [1500000, 500000]
+    description: Initial boost switching frequency. Hardware ignores changes while OTG is enabled.
+
+  system-overvoltage-percent:
+    type: int
+    enum: [104, 106, 108, 110]
+    description: Initial system overvoltage threshold as a percentage of the regulation voltage.
+
+  ntc-protection:
+    type: string
+    enum: ["enabled", "disabled"]
+    description: Include or bypass the NTC pin in charger and boost operation.

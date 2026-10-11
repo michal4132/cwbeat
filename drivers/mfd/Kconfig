@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+config MFD_WS9652A
+	bool "WS9652A PMU"
+	depends on DT_HAS_ZGMICRO_WS9652A_PMU_ENABLED
+	select MFD
+	select I2C
+	default y
+
+if MFD_WS9652A
+
+module = MFD_WS9652A
+module-str = mfd-ws9652a
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # MFD_WS9652A
+
+config MFD_WS9652A_RUNTIME_READ
+	bool "Experimental WS9652A runtime identity reads"
+	depends on MFD_WS9652A
+	help
+	  Allow locally serialized identity reads after successful PMU backend setup,
+	  including while the stock peers run. Hardware arbitration between cores
+	  is not established. This option alone does not enable runtime PMU writes.

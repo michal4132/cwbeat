@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config UDC_WS9652A
+	bool "ZGMICRO WS9652A USB device controller"
+	default y
+	depends on UDC_DRIVER && SOC_WS9652A_CPUTOP
+	depends on DT_HAS_ZGMICRO_WS9652A_UDC_ENABLED
+	depends on MULTITHREADING
+	help
+	  Native full-speed USB controller using the recovered TOP register and
+	  DMA sequences. A dedicated thread services control and CDC endpoints.
+	  No ROM entry points or fixed ROM SRAM workspace are used.
+
+if UDC_WS9652A
+
+config UDC_WS9652A_STACK_SIZE
+	int "USB controller thread stack size"
+	default 1536
+	range 1024 8192
+
+config UDC_WS9652A_THREAD_PRIORITY
+	int "USB controller preemptible thread priority"
+	default 2
+	range 0 14
+
+config UDC_WS9652A_POLL_INTERVAL_MS
+	int "USB polling interval in milliseconds"
+	default 1
+	range 1 10
+
+endif

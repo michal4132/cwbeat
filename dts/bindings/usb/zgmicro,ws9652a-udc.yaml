@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  ZGMICRO WS9652A TOP native USB device controller. The recovered profile
+  supports full-speed control endpoint zero, interrupt IN endpoint one,
+  and bulk IN/OUT endpoint two. USB DMA uses driver-owned SRAM buffers.
+
+compatible: "zgmicro,ws9652a-udc"
+
+include: usb-controller.yaml
+
+properties:
+  reg:
+    required: true
+  reg-names:
+    required: true
+    description: USB controller, DMA channels, DMA interrupt bank, and USB clock gate.
+  maximum-speed:
+    const: "full-speed"

@@ -1,0 +1,18 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/ {
+	test_i2c: test-i2c {
+		compatible = "vnd,ws9652a-pmu-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		test_pmu: pmu@34 {
+			compatible = "zgmicro,ws9652a-pmu";
+			reg = <0x34>;
+
+			test_adc: adc {
+				compatible = "zgmicro,ws9652a-adc";
+				#io-channel-cells = <1>;
+			};
+		};
+	};
+};

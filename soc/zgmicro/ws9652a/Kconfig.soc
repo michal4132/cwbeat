@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+config SOC_WS9652A
+	bool
+	help
+	  ZGMICRO WS9652A multiprocessor audio SoC.
+
+config SOC_WS9652A_CPUTOP
+	bool
+	select SOC_WS9652A
+	help
+	  WS9652A TOP Cortex-M3 application processor. The BT and DSP processors
+	  remain independently managed peers running their original firmware.
+
+config SOC
+	default "ws9652a" if SOC_WS9652A

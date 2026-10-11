@@ -1,0 +1,9 @@
+# Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_JBL_GO4
+	select SOC_WS9652A_CPUTOP if BOARD_JBL_GO4_WS9652A_CPUTOP
+	select GPIO if BOARD_JBL_GO4_WS9652A_CPUTOP
+	select BOARD_ID_GPIO if BOARD_JBL_GO4_WS9652A_CPUTOP
+	select WATCHDOG if BOARD_JBL_GO4_WS9652A_CPUTOP
+	select WS9652A_PEER if BOARD_JBL_GO4_WS9652A_CPUTOP

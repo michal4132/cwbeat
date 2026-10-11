@@ -1,0 +1,31 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Type-1 stock TOP 0x53494, followed by charge enable at 0x5331a.
+ * Normal application mode: REG05=0x8e, including the 10-hour safety timer.
+ * Include inside the SC89619D node. REG07 and REG0D remain inherited.
+ */
+enable-charging;
+southchip,high-impedance-mode = "disabled";
+southchip,stat-pin-mode = "enabled";
+input-current-limit-microamp = <1000000>;
+boost-current-limit-microamp = <1200000>;
+constant-charge-current-max-microamp = <420000>;
+precharge-current-microamp = <40000>;
+charge-term-current-microamp = <40000>;
+southchip,charge-voltage-base-microvolt = <4328000>;
+re-charge-threshold-microvolt = <200000>;
+top-off-time-minutes = <0>;
+charge-termination = "enabled";
+watchdog-timeout-ms = <0>;
+charge-safety-timer-hours = <10>;
+thermal-regulation-celsius = <110>;
+jeita-cool-current-percent = <50>;
+jeita-warm-current-percent = <100>;
+jeita-cool-temperature-millicelsius = <10000>;
+jeita-warm-temperature-millicelsius = <50500>;
+southchip,jeita-warm-voltage-mode = "coarse";
+precharge-voltage-threshold-microvolt = <3000000>;
+southchip,auto-dpdm = "enabled";
+buck-frequency-hz = <1500000>;
+boost-frequency-hz = <1500000>;
+system-overvoltage-percent = <106>;
+ntc-protection = "enabled";

@@ -1,0 +1,6 @@
+tests:
+  cwbeat.drivers.udc_ws9652a_hw:
+    platform_allow:
+      - qemu_cortex_m3
+    tags:
+      - usb

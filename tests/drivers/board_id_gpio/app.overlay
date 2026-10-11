@@ -1,0 +1,122 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	test_gpio0: board-id-gpio0 {
+		compatible = "vnd,board-id-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <32>;
+	};
+	test_gpio1: board-id-gpio1 {
+		compatible = "vnd,board-id-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <32>;
+	};
+	failed_gpio: board-id-failed-gpio {
+		compatible = "vnd,board-id-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <32>;
+		fail-init;
+	};
+
+	auto_id: auto-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 2 GPIO_ACTIVE_HIGH>;
+	};
+	raw_zero_id: raw-zero-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>;
+		zephyr,deferred-init;
+	};
+	mixed_id: mixed-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
+			<&test_gpio1 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+		zephyr,deferred-init;
+	};
+	mapped0_id: mapped0-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>, <&test_gpio0 1 GPIO_ACTIVE_HIGH>;
+		id-values = <4 2 1 3>;
+		zephyr,deferred-init;
+	};
+	mapped1_id: mapped1-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>, <&test_gpio0 1 GPIO_ACTIVE_HIGH>;
+		id-values = <4 2 1 3>;
+		zephyr,deferred-init;
+	};
+	mapped2_id: mapped2-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>, <&test_gpio0 1 GPIO_ACTIVE_HIGH>;
+		id-values = <4 2 1 3>;
+		zephyr,deferred-init;
+	};
+	mapped3_id: mapped3-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>, <&test_gpio0 1 GPIO_ACTIVE_HIGH>;
+		id-values = <4 2 1 3>;
+		zephyr,deferred-init;
+	};
+	external_straps_id: external-straps-id {
+		compatible = "gpio-board-id";
+		/* Go 4 straps use external bias on GPIO17 and GPIO21. */
+		gpios = <&test_gpio0 17 GPIO_ACTIVE_HIGH>, <&test_gpio0 21 GPIO_ACTIVE_HIGH>;
+		id-values = <4 2 1 3>;
+		sample-count = <3>;
+		sample-interval-us = <10>;
+		zephyr,deferred-init;
+	};
+	cached_id: cached-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 4 GPIO_ACTIVE_HIGH>;
+		sample-count = <3>;
+		sample-interval-us = <10>;
+		zephyr,deferred-init;
+	};
+	unstable_id: unstable-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 5 GPIO_ACTIVE_HIGH>;
+		sample-count = <3>;
+		zephyr,deferred-init;
+	};
+	configure_error_id: configure-error-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 6 GPIO_ACTIVE_HIGH>, <&test_gpio1 7 GPIO_ACTIVE_HIGH>;
+		zephyr,deferred-init;
+	};
+	read_error_id: read-error-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 8 GPIO_ACTIVE_HIGH>;
+		sample-count = <3>;
+		zephyr,deferred-init;
+	};
+	missing_gpio_id: missing-gpio-id {
+		compatible = "gpio-board-id";
+		gpios = <&failed_gpio 0 GPIO_ACTIVE_HIGH>;
+		zephyr,deferred-init;
+	};
+	raw32_id: raw32-id {
+		compatible = "gpio-board-id";
+		gpios = <&test_gpio0 0 GPIO_ACTIVE_HIGH>, <&test_gpio0 1 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 2 GPIO_ACTIVE_HIGH>, <&test_gpio0 3 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 4 GPIO_ACTIVE_HIGH>, <&test_gpio0 5 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 6 GPIO_ACTIVE_HIGH>, <&test_gpio0 7 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 8 GPIO_ACTIVE_HIGH>, <&test_gpio0 9 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 10 GPIO_ACTIVE_HIGH>, <&test_gpio0 11 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 12 GPIO_ACTIVE_HIGH>, <&test_gpio0 13 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 14 GPIO_ACTIVE_HIGH>, <&test_gpio0 15 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 16 GPIO_ACTIVE_HIGH>, <&test_gpio0 17 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 18 GPIO_ACTIVE_HIGH>, <&test_gpio0 19 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 20 GPIO_ACTIVE_HIGH>, <&test_gpio0 21 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 22 GPIO_ACTIVE_HIGH>, <&test_gpio0 23 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 24 GPIO_ACTIVE_HIGH>, <&test_gpio0 25 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 26 GPIO_ACTIVE_HIGH>, <&test_gpio0 27 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 28 GPIO_ACTIVE_HIGH>, <&test_gpio0 29 GPIO_ACTIVE_HIGH>,
+			<&test_gpio0 30 GPIO_ACTIVE_HIGH>, <&test_gpio0 31 GPIO_ACTIVE_HIGH>;
+		zephyr,deferred-init;
+	};
+};

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config CWBEAT_PMU_DIAGNOSTICS
+	bool "Experimental PMU validation shell"
+	depends on SHELL && MFD_WS9652A_RUNTIME_READ
+	help
+	  Enable asynchronous PMU identity probes and, when CWBEAT_BATTERY is
+	  enabled, battery ADC probes. Commands use a dedicated work queue and
+	  stop on the first error. This is a validation workload, not a battery
+	  monitor or charging policy.

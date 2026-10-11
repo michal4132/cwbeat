@@ -1,0 +1,7 @@
+rsource "stock_peer/Kconfig"
+rsource "audio/Kconfig"
+rsource "bluetooth/Kconfig"
+rsource "power/Kconfig"
+rsource "ui/Kconfig"
+rsource "battery/Kconfig"
+rsource "diagnostics/Kconfig"

@@ -1,0 +1,186 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	test_gpio: test-gpio {
+		compatible = "vnd,sc89619d-test-gpio";
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <4>;
+	};
+	main_bus: main-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		charger: charger@6a {
+			compatible = "southchip,sc89619d";
+			label = "test_charger";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 0 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+		};
+	};
+	noce_bus: noce-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		noce: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			zephyr,deferred-init;
+		};
+	};
+	configured_bus: configured-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		configured: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			constant-charge-current-max-microamp = <420001>;
+			precharge-current-microamp = <40001>;
+			charge-term-current-microamp = <60001>;
+			input-current-limit-microamp = <1000001>;
+			zephyr,deferred-init;
+		};
+	};
+	badid_bus: badid-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		badid: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 1 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+		};
+	};
+	init_error_bus: init-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		init_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 1 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+		};
+	};
+	gpio_error_bus: gpio-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		gpio_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 2 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+		};
+	};
+	invalid_bus: invalid-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		invalid: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			constant-charge-current-max-microamp = <1260001>;
+			zephyr,deferred-init;
+		};
+	};
+	shell_bus: shell-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		shell_charger: charger@6a {
+			compatible = "southchip,sc89619d";
+			label = "test_deferred_charger";
+			reg = <0x6a>;
+			zephyr,deferred-init;
+		};
+	};
+	oem_bus: oem-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	oem_noce_bus: oem-noce-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem_noce: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	oem_read_error_bus: oem-read-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem_read_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	oem_write_error_bus: oem-write-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem_write_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	oem_enable_error_bus: oem-enable-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem_enable_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	oem_identity_error_bus: oem-identity-error-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		oem_identity_error: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			#include "../../../boards/jbl/go4/jbl_go4-charger.dtsi"
+		};
+	};
+	invalid_voltage_bus: invalid-voltage-bus {
+		compatible = "vnd,sc89619d-test-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		invalid_voltage: charger@6a {
+			compatible = "southchip,sc89619d";
+			reg = <0x6a>;
+			ce-gpios = <&test_gpio 3 GPIO_ACTIVE_LOW>;
+			zephyr,deferred-init;
+			enable-charging;
+			southchip,charge-voltage-base-microvolt = <4328001>;
+		};
+	};
+};

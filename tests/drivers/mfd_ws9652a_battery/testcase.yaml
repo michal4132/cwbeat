@@ -1,0 +1,8 @@
+tests:
+  cwbeat.drivers.adc_ws9652a.battery:
+    platform_allow: [qemu_cortex_m3]
+    tags: [adc, pmu, battery]
+  cwbeat.drivers.adc_ws9652a.raw:
+    platform_allow: [qemu_cortex_m3]
+    extra_args: [TEST_BATTERY_HELPER=OFF]
+    tags: [adc, pmu, battery]

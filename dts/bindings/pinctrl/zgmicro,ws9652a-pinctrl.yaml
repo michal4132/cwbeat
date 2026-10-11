@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A TOP verified GPIO configuration and GPIO7/8 I2C0 routing.
+  States contain groups of pins sharing configuration. Groups are applied
+  in declaration order; repeated pins allow recovered configuration
+  sequences such as enabling a pull-down followed by disabling it. Explicit
+  output-high and output-low latch writes are deferred until every group's
+  pad/mux configuration is complete, then applied in declaration order. Without
+  a direction or bias property, a group changes only pin routing. A later entry
+  for a pin supersedes any pending explicit output level for that same pin.
+
+  Input configuration follows the recovered input sequence: route GPIO,
+  enable input mode, set the pin's output alias high, select the pull-down and
+  clear CONFIG08. GPIO0.0 retains its pre-routing power-latch level instead.
+  Output configuration preserves latches unless an explicit level is given.
+  GPIO0.0 output operations affect only its independent power latch, keeping
+  the power-button input routing, mode and bias. Explicit bias with an output
+  profile on GPIO0.0 is unsupported; configure its input bias separately.
+  Both banks support a 22 kOhm pull-down using bias-pull-down. bias-disable
+  disables it. Input/output profiles without a bias property disable the pull
+  except for GPIO0.0 output profiles. Bias-only groups preserve direction and
+  latch levels. Pull-up and drive strength are unsupported.
+  I2C0 supports only the complete GPIO0.7/8 mux group without additional pin
+  configuration; those pins cannot also select GPIO in the same state.
+
+  For example, a consumer can describe its pins and select a default state:
+
+    &pinctrl {
+      peripheral_default: peripheral-default {
+        sense {
+          pinmux = <WS9652A_PINMUX(0, 11, WS9652A_FUNC_GPIO)>;
+          input-enable;
+          bias-pull-down;
+        };
+        enable {
+          pinmux = <WS9652A_PINMUX(0, 10, WS9652A_FUNC_GPIO)>;
+          output-low;
+        };
+      };
+    };
+
+    &peripheral {
+      pinctrl-0 = <&peripheral_default>;
+      pinctrl-names = "default";
+    };
+
+  The consumer applies this state at its hardware-safe initialization point
+  with pinctrl_apply_state(config, PINCTRL_STATE_DEFAULT).
+
+compatible: "zgmicro,ws9652a-pinctrl"
+include: base.yaml
+properties:
+  reg:
+    required: true
+    description: Routing windows, GPIO port registers and per-pin output aliases.
+  reg-names:
+    required: true
+    description: |
+      Ordered bank0, bank1, gpio0, gpio1, pin_output0 and pin_output1 windows.
+child-binding:
+  description: Pin control state, containing ordered configuration groups.
+  child-binding:
+    description: Pins sharing a verified configuration.
+    include:
+      - name: pincfg-node.yaml
+        property-allowlist:
+          - input-enable
+          - output-enable
+          - output-low
+          - output-high
+          - bias-disable
+          - bias-pull-down
+    properties:
+      pinmux:
+        type: array
+        required: true
+        description: Pins encoded with WS9652A_PINMUX(bank, pin, function).

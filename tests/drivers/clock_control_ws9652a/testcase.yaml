@@ -1,0 +1,4 @@
+tests:
+  cwbeat.drivers.clock_control_ws9652a:
+    platform_allow: [qemu_cortex_m3]
+    tags: [clock, drivers]

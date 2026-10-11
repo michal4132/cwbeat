@@ -1,0 +1,11 @@
+common:
+  platform_allow:
+    - qemu_cortex_m3
+  tags:
+    - peer
+    - pinctrl
+tests:
+  cwbeat.drivers.peer_ws9652a: {}
+  cwbeat.drivers.peer_ws9652a.no_pinctrl:
+    extra_configs:
+      - CONFIG_PINCTRL=n

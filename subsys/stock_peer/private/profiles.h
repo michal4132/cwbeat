@@ -1,0 +1,40 @@
+#define DSP_SUBCOMMAND              UINT8_C(4)
+#define STORED_PROFILE_BYTES        UINT8_C(24)
+#define OVERRIDE_PROFILE_BYTES      UINT8_C(8)
+#define STORED_PROFILE_TYPE         UINT8_C(5)
+#define OVERRIDE_PROFILE_TYPE       UINT8_C(6)
+#define PROFILE_GAIN_NEGATIVE_THREE UINT8_C(0xFD)
+#define PROFILE_GAIN_FIVE           UINT8_C(5)
+#define PROFILE_GAIN_THREE          UINT8_C(3)
+static const uint8_t stored_profile[] = {
+	DSP_SUBCOMMAND,
+	STORED_PROFILE_BYTES,
+	0,
+	STORED_PROFILE_TYPE,
+	0,
+	0,
+	0,
+	PROFILE_GAIN_NEGATIVE_THREE,
+	0,
+	0,
+	0,
+	PROFILE_GAIN_NEGATIVE_THREE,
+	0,
+	0,
+	0,
+	PROFILE_GAIN_FIVE,
+	0,
+	0,
+	0,
+	PROFILE_GAIN_FIVE,
+	0,
+	0,
+	0,
+	PROFILE_GAIN_THREE,
+	0,
+	0,
+	0,
+};
+static const uint8_t override_profile[] = {
+	DSP_SUBCOMMAND, OVERRIDE_PROFILE_BYTES, 0, OVERRIDE_PROFILE_TYPE, 0, 0, 0, 0, 0, 0, 0,
+};

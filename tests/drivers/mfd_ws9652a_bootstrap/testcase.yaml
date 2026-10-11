@@ -1,0 +1,7 @@
+common:
+  platform_allow: [qemu_cortex_m3]
+  tags: [i2c, pmu]
+tests:
+  cwbeat.drivers.mfd_ws9652a.transports: {}
+  cwbeat.drivers.mfd_ws9652a.transports_generic:
+    extra_args: [TEST_NATIVE_I2C=OFF]

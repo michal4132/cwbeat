@@ -1,0 +1,10 @@
+config CWBEAT_AUDIO
+ bool "Stock audio controls"
+ depends on ZBUS && GPIO
+ default y if BOARD_JBL_GO4
+
+if CWBEAT_AUDIO
+module = CWBEAT_AUDIO
+module-str = CWbeat audio
+source "subsys/logging/Kconfig.template.log_config"
+endif

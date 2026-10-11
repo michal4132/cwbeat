@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+description: JBL Go 4 retained-firmware shared-memory protocol endpoint
+compatible: "jbl,go4-stock-ipc"
+include: base.yaml
+properties:
+  memory-region:
+    type: phandle
+    required: true
+  peer-controller:
+    type: phandle
+    required: true
+  board-id:
+    type: phandle
+    required: true
+    description: Board identification device initialized before releasing the peers.
+  mboxes:
+    required: true
+  mbox-names:
+    required: true

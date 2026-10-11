@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+config PINCTRL_WS9652A
+	bool "WS9652A verified GPIO configuration and I2C0 routing"
+	depends on SOC_WS9652A_CPUTOP
+	depends on DT_HAS_ZGMICRO_WS9652A_PINCTRL_ENABLED
+	select PINCTRL
+	help
+	  Apply recovered GPIO routing, direction and latch configuration, and
+	  the GPIO7/8 I2C0 mux sequence.
+	  Other peripheral muxes, pull resistors and drive strength are unsupported.

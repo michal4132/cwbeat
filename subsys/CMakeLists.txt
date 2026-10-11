@@ -1,0 +1,7 @@
+add_subdirectory_ifdef(CONFIG_CWBEAT_STOCK_PEER stock_peer)
+add_subdirectory_ifdef(CONFIG_CWBEAT_AUDIO audio)
+add_subdirectory_ifdef(CONFIG_CWBEAT_BLUETOOTH bluetooth)
+add_subdirectory_ifdef(CONFIG_CWBEAT_POWER power)
+add_subdirectory_ifdef(CONFIG_CWBEAT_UI ui)
+add_subdirectory_ifdef(CONFIG_CWBEAT_BATTERY battery)
+add_subdirectory_ifdef(CONFIG_CWBEAT_PMU_DIAGNOSTICS diagnostics)

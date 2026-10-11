@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config I2C_WS9652A
+	bool "WS9652A routed I2C controller"
+	depends on I2C && WS9652A_REGISTER_BUS && CLOCK_CONTROL && PINCTRL
+	depends on DT_HAS_ZGMICRO_WS9652A_I2C_ENABLED
+	default y
+	help
+	  Bounded polling transfers on external route 0 and internal route 1.
+	  The hardware parent owns the transfer engine and receive buffer; channel
+	  children expose standard I2C APIs. The shared register-bus lock and its
+	  peers-held permission protect complete transfers. Device initialization
+	  does not touch hardware. Only standard-speed, 7-bit controller mode is
+	  supported, without automatic transfer replay or bus recovery.
+
+if I2C_WS9652A
+
+module = I2C_WS9652A
+module-str = i2c-ws9652a
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # I2C_WS9652A

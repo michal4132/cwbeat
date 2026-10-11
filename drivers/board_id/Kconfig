@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_ID_GPIO
+	bool "GPIO board identifier"
+	default y
+	depends on GPIO && DT_HAS_GPIO_BOARD_ID_ENABLED
+	help
+	  Capture a board identifier from GPIO straps during device initialization.
+	  GPIO ordering, optional stability sampling and identifier mapping are
+	  described by gpio-board-id devicetree nodes.
+
+config BOARD_ID_GPIO_INIT_PRIORITY
+	int "GPIO board identifier initialization priority"
+	default 80
+	depends on BOARD_ID_GPIO
+	help
+	  POST_KERNEL initialization priority. Set this after the GPIO controllers
+	  used by the identification pins. Use zephyr,deferred-init in devicetree
+	  when sampling must wait for application-controlled hardware preparation.

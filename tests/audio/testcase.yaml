@@ -1,0 +1,4 @@
+tests:
+  cwbeat.audio:
+    platform_allow: qemu_cortex_m3
+    tags: [audio, zbus]

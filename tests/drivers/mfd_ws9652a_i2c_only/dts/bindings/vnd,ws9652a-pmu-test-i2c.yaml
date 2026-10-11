@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Scripted generic I2C controller for WS9652A PMU tests
+compatible: "vnd,ws9652a-pmu-test-i2c"
+include: i2c-controller.yaml

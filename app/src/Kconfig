@@ -1,0 +1,14 @@
+# Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+# SPDX-License-Identifier: Apache-2.0
+
+menu "App"
+
+config APP_BOOT_BANNER
+        string "Boot banner displayed on app boot"
+        default "CWbeat"
+
+module = APP
+module-str = app
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu

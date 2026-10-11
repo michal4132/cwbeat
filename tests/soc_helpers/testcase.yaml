@@ -1,0 +1,5 @@
+tests:
+  cwbeat.soc_helpers:
+    tags: [soc, cwbeat]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]

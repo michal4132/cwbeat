@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Scripted GPIO controller for board ID driver tests
+compatible: "vnd,board-id-test-gpio"
+include: [base.yaml, gpio-controller.yaml]
+properties:
+  fail-init:
+    type: boolean
+    description: Return ENODEV from controller initialization.
+gpio-cells:
+  - pin
+  - flags

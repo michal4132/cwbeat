@@ -1,0 +1,6 @@
+common:
+  tags: [gpio, board_id]
+  platform_allow: [qemu_cortex_m3]
+  integration_platforms: [qemu_cortex_m3]
+tests:
+  cwbeat.drivers.board_id_gpio: {}

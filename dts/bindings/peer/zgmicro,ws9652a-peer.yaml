@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A retained BT and DSP hardware control. The optional default pinctrl
+  state is applied explicitly after PMU policy and shared-arena initialization,
+  before strap detection and BT release. Device init and emergency peer holds
+  do not apply it.
+compatible: "zgmicro,ws9652a-peer"
+include: [base.yaml, pinctrl-device.yaml]
+properties:
+  reg:
+    required: true
+  reg-names:
+    description: "Register regions in order: bt, mapping, dsp, controller, policy."
+    required: true
+  watchdog:
+    type: phandle
+    required: true
+    description: |
+      WS9652A watchdog stopped after holding BT. Its disable operation must
+      be usable before device initialization for emergency peer holds.
+  pmu:
+    type: phandle
+    required: true
+  register-bus:
+    type: phandle
+    required: true
+    description: |
+      Shared register-bus domain. Normal lifecycle operations publish verified
+      peer holds and close transport admission before releasing BT.
+  stock-flash-offset:
+    type: int
+    required: true

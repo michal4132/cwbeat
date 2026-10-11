@@ -1,0 +1,14 @@
+common:
+  tags: [charger, i2c, gpio]
+  platform_allow: [qemu_cortex_m3]
+  integration_platforms: [qemu_cortex_m3]
+tests:
+  cwbeat.drivers.charger_sc89619d: {}
+  cwbeat.drivers.charger_sc89619d.shell:
+    extra_configs:
+      - CONFIG_LOG=y
+      - CONFIG_CHARGER_SC89619D_LOG_LEVEL_DBG=y
+      - CONFIG_SHELL=y
+      - CONFIG_SHELL_BACKEND_SERIAL=n
+      - CONFIG_SHELL_BACKEND_DUMMY=y
+      - CONFIG_CHARGER_SHELL=y

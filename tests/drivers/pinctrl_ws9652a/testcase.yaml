@@ -1,0 +1,6 @@
+tests:
+  cwbeat.drivers.pinctrl_ws9652a:
+    platform_allow:
+      - qemu_cortex_m3
+    tags:
+      - pinctrl

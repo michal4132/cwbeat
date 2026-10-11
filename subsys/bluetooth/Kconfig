@@ -1,0 +1,17 @@
+menuconfig CWBEAT_BLUETOOTH
+ bool "Stock Bluetooth session and media"
+ depends on CWBEAT_STOCK_PEER && CWBEAT_AUDIO
+ default y
+if CWBEAT_BLUETOOTH
+config CWBEAT_BLUETOOTH_DISABLE_FEEDBACK
+ bool "Disable sound feedback before wake"
+ default y
+config CWBEAT_BLUETOOTH_SHELL
+ bool "Bluetooth shell commands"
+ depends on SHELL
+ default y
+
+module = CWBEAT_BLUETOOTH
+module-str = CWbeat Bluetooth
+source "subsys/logging/Kconfig.template.log_config"
+endif

@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+description: |
+  WS9652A standard I2C bus channel beneath zgmicro,ws9652a-i2c. The reg value
+  selects external route 0 or internal PMU route 1. Optional pinctrl applies
+  only to route 0, lazily on its first permitted transfer. Supports at most
+  256 total bytes as a single read/write, repeated-START write/read pair, or
+  two contiguous write buffers. No automatic retries or recovery pulses.
+
+compatible: "zgmicro,ws9652a-i2c-channel"
+include: [i2c-controller.yaml, pinctrl-device.yaml]
+
+properties:
+  reg:
+    required: true
+  clock-frequency:
+    required: true
+    const: 100000

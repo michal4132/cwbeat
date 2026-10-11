@@ -1,0 +1,16 @@
+name: cwbeat
+
+build:
+  kconfig: zephyr/Kconfig
+  cmake: zephyr
+  settings:
+    board_root: .
+    soc_root: .
+    dts_root: .
+
+samples:
+  - app
+tests:
+  - tests
+runners:
+  - file: scripts/runners/jbl_bl.py

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+config GPIO_ZGMICRO_WS9652A
+	bool "ZGMICRO WS9652A TOP GPIO"
+	default y
+	depends on SOC_WS9652A_CPUTOP
+	depends on GPIO && DT_HAS_ZGMICRO_WS9652A_GPIO_ENABLED
+	select PINCTRL_WS9652A
+	help
+	  Polled GPIO inputs and output latches for the reverse-engineered Go 4
+	  TOP profile. Consumers select direction for any pin made available by
+	  devicetree ngpios and gpio-reserved-ranges.
+	  GPIO interrupts, pulls, single-ended modes and drive strength are unsupported.

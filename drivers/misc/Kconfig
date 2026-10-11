@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config WS9652A_REGISTER_BUS
+	bool "WS9652A shared register bus domain"
+	depends on DT_HAS_ZGMICRO_WS9652A_REGISTER_BUS_ENABLED
+	default y
+	help
+	  Local serialization and verified peer-hold admission for the direct
+	  register bridge and routed I2C engine sharing one bit-band gate.
+	  Initialization changes no hardware and starts with held-peer admission
+	  closed. This provider does not depend on PMU protocol or peer drivers.
+
+if WS9652A_REGISTER_BUS
+
+module = WS9652A_REGISTER_BUS
+module-str = ws9652a-register-bus
+source "subsys/logging/Kconfig.template.log_config"
+
+endif
+
+config WS9652A_PMU_BRIDGE
+	bool "WS9652A direct byte-register bridge"
+	depends on DT_HAS_ZGMICRO_WS9652A_PMU_BRIDGE_ENABLED
+	depends on WS9652A_REGISTER_BUS
+	default y
+	help
+	  Bounded byte reads and writes through the dedicated internal register
+	  engine. Backend selection and PMU policy belong to consumers. Device
+	  initialization performs no MMIO.
+
+if WS9652A_PMU_BRIDGE
+
+module = WS9652A_PMU_BRIDGE
+module-str = ws9652a-pmu-bridge
+source "subsys/logging/Kconfig.template.log_config"
+
+endif

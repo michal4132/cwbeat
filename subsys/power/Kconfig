@@ -1,0 +1,21 @@
+# Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+# SPDX-License-Identifier: Apache-2.0
+
+config CWBEAT_POWER
+ bool "Board power intent"
+ depends on ZBUS && CWBEAT_BLUETOOTH && CWBEAT_AUDIO
+ default y if BOARD_JBL_GO4
+config CWBEAT_POWER_AUTOSTART
+ bool "Automatically request board power on"
+ depends on CWBEAT_POWER
+ default y
+config CWBEAT_POWER_SHELL
+ bool "Power shell commands"
+ depends on CWBEAT_POWER && SHELL
+ default y
+
+if CWBEAT_POWER
+module = CWBEAT_POWER
+module-str = CWbeat power
+source "subsys/logging/Kconfig.template.log_config"
+endif

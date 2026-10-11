@@ -1,0 +1,169 @@
+/*
+ * Copyright 2026 Michał Bogdziewicz michal@bogdziewicz.xyz
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* TOP address space only. Future cpubt/cpudsp descriptions must declare
+ * their own CPU and memory maps; peer firmware remains unchanged here. */
+
+#include <arm/armv7-m.dtsi>
+#include <zephyr/dt-bindings/clock/ws9652a-clock.h>
+
+/ {
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-m3";
+			reg = <0>;
+		};
+	};
+
+	/* Full private TOP SRAM. SBL/peer shared memory starts after this bank. */
+	sram0: memory@20000000 {
+		device_type = "memory";
+		compatible = "mmio-sram";
+		reg = <0x20000000 0x10000>;
+	};
+
+	peer_shm: memory@20010000 {
+		compatible = "mmio-sram";
+		reg = <0x20010000 0x10000>;
+	};
+
+	soc {
+		/* Full lower TOP allocation: physical flash 0x10000..0x50000,
+		 * linked at CPU 0x40000..0x80000 (end addresses excluded).
+		 * Packaging, metadata CRCs and programming belong to the runner. */
+		flash0: flash@40000 {
+			compatible = "soc-nv-flash";
+			reg = <0x40000 0x40000>;
+			write-block-size = <1>;
+		};
+
+		clkctrl: clock-controller@40000000 {
+			compatible = "zgmicro,ws9652a-clock";
+			reg = <0x40000000 0x54>;
+			#clock-cells = <1>;
+		};
+
+		pinctrl: pinctrl@40014014 {
+			compatible = "zgmicro,ws9652a-pinctrl";
+			reg = <0x40014014 0x2c>, <0x40014054 0x14>,
+			      <0x40014000 0x40>, <0x40014040 0x40>,
+			      <0x40014100 0x80>, <0x40014200 0x80>;
+			reg-names = "bank0", "bank1", "gpio0", "gpio1",
+				    "pin_output0", "pin_output1";
+		};
+
+		gpio0: gpio@40014000 {
+			compatible = "zgmicro,ws9652a-gpio";
+			reg = <0x40014000 0x40>, <0x40014100 0x80>;
+			reg-names = "port", "pin_output";
+			gpio-controller;
+			#gpio-cells = <2>;
+			ngpios = <32>;
+			bank = <0>;
+			status = "disabled";
+		};
+
+		gpio1: gpio@40014040 {
+			compatible = "zgmicro,ws9652a-gpio";
+			reg = <0x40014040 0x40>, <0x40014200 0x80>;
+			reg-names = "port", "pin_output";
+			gpio-controller;
+			#gpio-cells = <2>;
+			ngpios = <32>;
+			bank = <1>;
+			status = "disabled";
+		};
+
+		wdt0: watchdog@40018000 {
+			compatible = "zgmicro,ws9652a-watchdog";
+			reg = <0x40018000 0x50>;
+		};
+
+		register_bus: register-bus@424001ec {
+			compatible = "zgmicro,ws9652a-register-bus";
+			reg = <0x424001ec 4>;
+		};
+
+		pmu_bridge: pmu-bridge@40038000 {
+			compatible = "zgmicro,ws9652a-pmu-bridge";
+			reg = <0x40038000 0x18>;
+			register-bus = <&register_bus>;
+
+			pmu: pmu {
+				compatible = "zgmicro,ws9652a-pmu";
+				bootstrap-i2c-bus = <&i2c_internal>;
+
+				pmu_adc: adc {
+					compatible = "zgmicro,ws9652a-adc";
+					#io-channel-cells = <1>;
+					status = "disabled";
+				};
+			};
+		};
+
+		i2c_controller: i2c@4001c000 {
+			compatible = "zgmicro,ws9652a-i2c";
+			reg = <0x4001c000 0x24>;
+			reg-names = "controller";
+			register-bus = <&register_bus>;
+			clocks = <&clkctrl WS9652A_CLOCK_CORE>, <&clkctrl WS9652A_CLOCK_BUS>;
+			clock-names = "core", "bus";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			i2c0: i2c@0 {
+				compatible = "zgmicro,ws9652a-i2c-channel";
+				reg = <0>;
+				clock-frequency = <100000>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+				status = "disabled";
+			};
+
+			i2c_internal: i2c@1 {
+				compatible = "zgmicro,ws9652a-i2c-channel";
+				reg = <1>;
+				clock-frequency = <100000>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+			};
+		};
+
+		peer_ctrl: peer@40000080 {
+			compatible = "zgmicro,ws9652a-peer";
+			reg = <0x40000080 4>, <0x40030080 8>, <0x4004c000 0x2c>,
+				<0x40020008 4>, <0x4002d03c 4>;
+			reg-names = "bt", "mapping", "dsp", "controller", "policy";
+			watchdog = <&wdt0>;
+			pmu = <&pmu>;
+			register-bus = <&register_bus>;
+			stock-flash-offset = <0x50000>;
+		};
+
+		peer_mbox: mailbox@4004c000 {
+			compatible = "zgmicro,ws9652a-mbox";
+			reg = <0x4004c000 4>;
+			#mbox-cells = <1>;
+		};
+
+		zephyr_udc0: usb0: usb@40048000 {
+			compatible = "zgmicro,ws9652a-udc";
+			reg = <0x40048000 0x1000>, <0x4002e000 0x400>,
+			      <0x4002f000 0x20>, <0x4002f900 4>;
+			reg-names = "usb", "dma", "dma_irq", "clock_gate";
+			maximum-speed = "full-speed";
+			status = "disabled";
+		};
+	};
+};
+
+&nvic {
+	/* Use the Cortex-M3 minimum priority-bit subset. No peripheral ISR
+	 * priority scheme from the proprietary TOP is inherited. */
+	arm,num-irq-priority-bits = <3>;
+};

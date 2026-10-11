@@ -1,0 +1,17 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/ {
+	xtal: clock-xtal {
+		compatible = "fixed-clock";
+		clock-frequency = <26000000>;
+		#clock-cells = <0>;
+	};
+
+	clkctrl: clock-controller@40000000 {
+		compatible = "zgmicro,ws9652a-clock";
+		reg = <0x40000000 0x1000>;
+		#clock-cells = <1>;
+		clocks = <&xtal>;
+		clock-names = "xtal";
+		status = "okay";
+	};
+};

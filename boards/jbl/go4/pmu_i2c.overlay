@@ -1,0 +1,17 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Select I2C for the same PMU device; keep the bridge for inherited-mode handover. */
+/delete-node/ &pmu;
+
+&i2c_internal {
+	pmu: pmu@34 {
+		compatible = "zgmicro,ws9652a-pmu";
+		reg = <0x34>;
+		direct-bridge = <&pmu_bridge>;
+
+		pmu_adc: adc {
+			compatible = "zgmicro,ws9652a-adc";
+			#io-channel-cells = <1>;
+			status = "okay";
+		};
+	};
+};

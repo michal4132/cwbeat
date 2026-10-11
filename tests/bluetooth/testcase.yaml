@@ -1,0 +1,20 @@
+tests:
+  cwbeat.bluetooth:
+    tags: [bluetooth, zbus, cwbeat]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]
+  cwbeat.bluetooth.shutdown_timeout:
+    tags: [bluetooth, zbus, cwbeat]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]
+    extra_args: BT_TEST_SHUTDOWN_TIMEOUT=ON
+  cwbeat.bluetooth.completion_overflow:
+    tags: [bluetooth, zbus, cwbeat]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]
+    extra_args: BT_TEST_COMPLETION_OVERFLOW=ON
+  cwbeat.bluetooth.disable_during_cleanup:
+    tags: [bluetooth, zbus, cwbeat]
+    platform_allow: [qemu_cortex_m3]
+    integration_platforms: [qemu_cortex_m3]
+    extra_args: BT_TEST_DISABLE_DURING_CLEANUP=ON

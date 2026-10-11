@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Scripted I2C controller for SC89619D charger tests
+compatible: "vnd,sc89619d-test-i2c"
+include: [base.yaml, i2c-controller.yaml]
